@@ -511,7 +511,7 @@ prove = expr("Criminal(West)")
 
 # # # print(kb2.clauses)
 
-print(kb2.ask(prove) != None)
+print(kb2.ask(prove) != False)
 for i in infer:
     print(i)
 
