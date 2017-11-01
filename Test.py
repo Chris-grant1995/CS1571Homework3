@@ -262,7 +262,7 @@ def fol_fc_ask(KB, alpha):
 
     # check if we can answer without new inferences
     for q in KB.clauses:
-        phi = unify(q, alpha, {})
+        phi = unify(q, alpha)
         # print(q, " ", alpha)
         if phi is not None:
             yield phi
@@ -276,10 +276,10 @@ def fol_fc_ask(KB, alpha):
             for theta in enum_subst(p):
                 if set(subst(theta, p)).issubset(set(KB.clauses)):
                     q_ = subst(theta, q)
-                    if all([unify(x, q_, {}) is None for x in KB.clauses + new]):
+                    if all([unify(x, q_) is None for x in KB.clauses + new]):
                         new.append(q_)
                         # print(q_, " ", alpha)
-                        phi = unify(q_, alpha, {})
+                        phi = unify(q_, alpha)
                         # print("PHI: ", phi)
                         if phi is not None:
                             # print("Test")
@@ -355,7 +355,7 @@ def is_variable(x):
     """A variable is an Expr with no args and a lowercase symbol as the op."""
     return isinstance(x, Expr) and not x.args and x.op[0].islower()
 
-def unify(f1,f2,s={}):
+def unify(f1,f2):
     # print(f1)
     # print(f2)
     subs = {}
@@ -405,38 +405,6 @@ def unify(f1,f2,s={}):
 #         return r
 #     else:
 #         return None
-
-def unify_var(var, x, s):
-    if var in s:
-        return unify(s[var], x, s)
-    elif x in s:
-        return unify(var, s[x], s)
-    elif occur_check(var, x, s):
-        return None
-    else:
-        return extend(s, var, x)
-
-def extend(s, var, val):
-    """Copy the substitution s and extend it by setting var to val; return copy."""
-    s2 = s.copy()
-    s2[var] = val
-    return s2
-
-
-def occur_check(var, x, s):
-    """Return true if variable var occurs anywhere in x
-    (or in subst(s, x), if s has a binding for x)."""
-    if var == x:
-        return True
-    elif is_variable(x) and x in s:
-        return occur_check(var, s[x], s)
-    elif isinstance(x, Expr):
-        return (occur_check(var, x.op, s) or
-                occur_check(var, x.args, s))
-    elif isinstance(x, (list, tuple)):
-        return first(e for e in x if occur_check(var, e, s))
-    else:
-        return False
 
 def expr(x):
     """Shortcut to create an Expression. x is a str in which:
