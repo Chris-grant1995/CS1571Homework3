@@ -10,6 +10,7 @@ import random
 import math
 import functools
 import time
+import sys
 
 infix_ops = '==> <== <=>'.split()
 
@@ -344,60 +345,49 @@ def issequence(x):
 Number = (int, float, complex)
 Expression = (Expr, Number)
 
-l = ['Instrument(y)  &  Musician(x)  ==>  Plays(x,y)',
-    "Instrument(y)  &  Plays(x,y)  ==>  NotToneDeaf(x)",
-     "Musician(Grace)",
-    "Instrument(I1)"]
+def parse_input(l):
+    #L is a list representation of the file
 
-l = [
-    "American(x)  &  Weapon(y)  &  Nation(z)  &  Hostile(z)  &  Sells(x,z,y)  ==>  Criminal(x)",
-    "Owns(Nono,x)  &  Missile(x)  ==>  Sells(West,Nono,x)",
-    "Missile(x)  ==>  Weapon(x)",
-    "Enemy(x,America)  ==>  Hostile(x)",
-    "American(West)",
-    "Nation(Nono)",
-    "Enemy(Nono,America)",
-    "Owns(Nono,M1)",
-    "Missile(M1)",
-    "Nation(America)"
-]
+    p = l.pop()
+    p = p.replace("PROVE ", "")
 
-l = [
-    "TooBig(x) ^ GoodSize(y) -> BetterPet(y,x)",
-    "Giraffe(x) -> TooBig(x)",
-    "Dog(x) -> GoodSize(x)",
-    "Barks(x) ^ WagsTail(x) -> Dog(x)",
-    "Giraffe(Bob)",
-    "Barks(Sally)",
-    "WagsTail(Sally)"
-]
-
-for i in range(0,len(l)):
-    s = l[i]
-    s = s.replace("^", "&")
-    s = s.replace("->", "==>")
-    l[i] = s
-
-m = map(expr, l)
-kb2 = FolKB(m)
+    for i in range(0,len(l)):
+        s = l[i]
+        s = s.replace("^", "&")
+        s = s.replace("->", "==>")
+        l[i] = s
+    return (l,p)
 
 
+def main():
+    
+    f = sys.argv[1]
+    file = open(f)
+    l = file.readlines()
 
-prove = expr("NotToneDeaf(Grace)")
-prove = expr("Criminal(West)")
-prove = expr("BetterPet(Sally,Bob)")
+    
+    # l = [
+    #     "TooBig(x) ^ GoodSize(y) -> BetterPet(y,x)",
+    #     "Giraffe(x) -> TooBig(x)",
+    #     "Dog(x) -> GoodSize(x)",
+    #     "Barks(x) ^ WagsTail(x) -> Dog(x)",
+    #     "Giraffe(Bob)",
+    #     "Barks(Sally)",
+    #     "WagsTail(Sally)",
+    #     "PROVE BetterPet(Sally,Bob)"
+    # ]
 
-# # # print(kb2.clauses)
-# print(kb2.IFCclauses)
-print(kb2.ask(prove) != False)
-for i in infer:
-    print(i)
+    l, p = parse_input(l)
 
-# print(kb2.IFCclauses)
+    m = map(expr, l)
+    kb2 = FolKB(m)
 
+    prove = expr(p)
 
+    # # # print(kb2.clauses)
+    # print(kb2.IFCclauses)
+    print(kb2.ask(prove) != False)
+    for i in infer:
+        print(i)
 
-# exp1 = expr("Owns(x,y)")
-# exp2 = expr("Owns(Nono,M1)")
-# r = unify2(exp1,exp2)
-# print(r)
+main()

@@ -1,0 +1,8 @@
+TooBig(x) ^ GoodSize(y) -> BetterPet(y,x)
+Giraffe(x) -> TooBig(x)
+Dog(x) -> GoodSize(x)
+Barks(x) ^ WagsTail(x) -> Dog(x)
+Giraffe(Bob)
+Barks(Sally)
+WagsTail(Sally)
+PROVE BetterPet(Sally,Bob)
