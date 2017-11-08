@@ -16,17 +16,6 @@ infix_ops = '==> <== <=>'.split()
 infer = []
 
 class FolKB():
-    """A knowledge base consisting of first-order definite clauses.
-    >>> kb0 = FolKB([expr('Farmer(Mac)'), expr('Rabbit(Pete)'),
-    ...              expr('(Rabbit(r) & Farmer(f)) ==> Hates(f, r)')])
-    >>> kb0.tell(expr('Rabbit(Flopsie)'))
-    >>> kb0.retract(expr('Rabbit(Pete)'))
-    >>> kb0.ask(expr('Hates(Mac, x)'))[x]
-    Flopsie
-    >>> kb0.ask(expr('Wife(Pete, x)'))
-    False
-    """
-
     def __init__(self, initial_clauses=[]):
         self.clauses = []  # inefficient: no indexing
         self.IFCclauses = {}
@@ -62,52 +51,8 @@ class Expr(object):
     def __init__(self, op, *args):
         self.op = str(op)
         self.args = args
-
-    # Operator overloads
-    def __neg__(self):
-        return Expr('-', self)
-
-    def __pos__(self):
-        return Expr('+', self)
-
-    def __invert__(self):
-        return Expr('~', self)
-
-    def __add__(self, rhs):
-        return Expr('+', self, rhs)
-
-    def __sub__(self, rhs):
-        return Expr('-', self, rhs)
-
-    def __mul__(self, rhs):
-        return Expr('*', self, rhs)
-
-    def __pow__(self, rhs):
-        return Expr('**', self, rhs)
-
-    def __mod__(self, rhs):
-        return Expr('%', self, rhs)
-
     def __and__(self, rhs):
         return Expr('&', self, rhs)
-
-    def __xor__(self, rhs):
-        return Expr('^', self, rhs)
-
-    def __rshift__(self, rhs):
-        return Expr('>>', self, rhs)
-
-    def __lshift__(self, rhs):
-        return Expr('<<', self, rhs)
-
-    def __truediv__(self, rhs):
-        return Expr('/', self, rhs)
-
-    def __floordiv__(self, rhs):
-        return Expr('//', self, rhs)
-
-    def __matmul__(self, rhs):
-        return Expr('@', self, rhs)
 
     def __or__(self, rhs):
         """Allow both P | Q, and P |'==>'| Q."""
@@ -115,50 +60,6 @@ class Expr(object):
             return Expr('|', self, rhs)
         else:
             return PartialExpr(rhs, self)
-
-    # Reverse operator overloads
-    def __radd__(self, lhs):
-        return Expr('+', lhs, self)
-
-    def __rsub__(self, lhs):
-        return Expr('-', lhs, self)
-
-    def __rmul__(self, lhs):
-        return Expr('*', lhs, self)
-
-    def __rdiv__(self, lhs):
-        return Expr('/', lhs, self)
-
-    def __rpow__(self, lhs):
-        return Expr('**', lhs, self)
-
-    def __rmod__(self, lhs):
-        return Expr('%', lhs, self)
-
-    def __rand__(self, lhs):
-        return Expr('&', lhs, self)
-
-    def __rxor__(self, lhs):
-        return Expr('^', lhs, self)
-
-    def __ror__(self, lhs):
-        return Expr('|', lhs, self)
-
-    def __rrshift__(self, lhs):
-        return Expr('>>', lhs, self)
-
-    def __rlshift__(self, lhs):
-        return Expr('<<', lhs, self)
-
-    def __rtruediv__(self, lhs):
-        return Expr('/', lhs, self)
-
-    def __rfloordiv__(self, lhs):
-        return Expr('//', lhs, self)
-
-    def __rmatmul__(self, lhs):
-        return Expr('@', lhs, self)
-
     def __call__(self, *args):
         "Call: if 'f' is a Symbol, then f(0) == Expr('f', 0)."
         if self.args:
@@ -397,30 +298,6 @@ def unify(f1,f2):
         
     return subs
 
-# def unify(x, y, s={}):
-#     """Unify expressions x,y with substitution s; return a substitution that
-#     would make x,y equal, or None if x,y can not unify. x and y can be
-#     variables (e.g. Expr('x')), constants, lists, or Exprs. [Figure 9.1]"""
-#     if s is None:
-#         return None
-#     elif x == y:
-#         return s
-#     elif is_variable(x):
-#         return unify_var(x, y, s)
-#     elif is_variable(y):
-#         return unify_var(y, x, s)
-#     elif isinstance(x, Expr) and isinstance(y, Expr):
-#         return unify(x.args, y.args, unify(x.op, y.op, s))
-#     elif isinstance(x, str) or isinstance(y, str):
-#         return None
-#     elif issequence(x) and issequence(y) and len(x) == len(y):
-#         if not x:
-#             print(s)
-#             return s
-#         r = unify(x[1:], y[1:], unify(x[0], y[0], s))
-#         return r
-#     else:
-#         return None
 
 def expr(x):
     """Shortcut to create an Expression. x is a str in which:
@@ -485,6 +362,22 @@ l = [
     "Nation(America)"
 ]
 
+l = [
+    "TooBig(x) ^ GoodSize(y) -> BetterPet(y,x)",
+    "Giraffe(x) -> TooBig(x)",
+    "Dog(x) -> GoodSize(x)",
+    "Barks(x) ^ WagsTail(x) -> Dog(x)",
+    "Giraffe(Bob)",
+    "Barks(Sally)",
+    "WagsTail(Sally)"
+]
+
+for i in range(0,len(l)):
+    s = l[i]
+    s = s.replace("^", "&")
+    s = s.replace("->", "==>")
+    l[i] = s
+
 m = map(expr, l)
 kb2 = FolKB(m)
 
@@ -492,6 +385,7 @@ kb2 = FolKB(m)
 
 prove = expr("NotToneDeaf(Grace)")
 prove = expr("Criminal(West)")
+prove = expr("BetterPet(Sally,Bob)")
 
 # # # print(kb2.clauses)
 # print(kb2.IFCclauses)
@@ -499,7 +393,7 @@ print(kb2.ask(prove) != False)
 for i in infer:
     print(i)
 
-print(kb2.IFCclauses)
+# print(kb2.IFCclauses)
 
 
 
