@@ -1,0 +1,6 @@
+True
+Roman(Marcus)
+People(Marcus)
+People(Caesar)
+Traitor(Marcus)
+Hate(Marcus, Caesar)

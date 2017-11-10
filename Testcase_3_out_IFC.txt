@@ -1,0 +1,6 @@
+True
+Sibling(Lisa, Jay)
+Sibling(Eric, Rachel)
+Distinct(Rachel, Eric)
+Distinct(Jay, Lisa)
+Sibling(Rachel, Eric)

@@ -1,0 +1,11 @@
+False
+Sibling(Eric, Rachel)
+Sibling(Lisa, Jay)
+Distinct(Jay, Lisa)
+Distinct(Rachel, Eric)
+Sibling(Jay, Lisa)
+Sibling(Rachel, Eric)
+Cousin(Rachel, Frances)
+Cousin(Eric, Frances)
+Cousin(Frances, Rachel)
+Cousin(Frances, Eric)

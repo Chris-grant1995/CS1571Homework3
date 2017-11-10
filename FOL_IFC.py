@@ -24,18 +24,17 @@ class FolKB():
             self.tell(clause)
 
     def tell(self, sentence, k=0):
-        if is_definite_clause(sentence):
+        if isDefClause(sentence):
             self.clauses.append(sentence)
             self.IFCclauses[sentence] = k
         else:
             raise Exception("Not a definite clause: {}".format(sentence))
 
     def ask(self, query):
-        """Return a substitution that makes the query true, or, failing that, return False."""
         return first(self.ask_generator(query), default=False)
 
     def ask_generator(self, query):
-        return fol_fc_ask(self, query)
+        return IncForwardChain(self, query)
 
     def retract(self, sentence):
         self.clauses.remove(sentence)
@@ -44,11 +43,6 @@ class FolKB():
         return self.clauses
 
 class Expr(object):
-    """A mathematical expression with an operator and 0 or more arguments.
-    op is a str like '+' or 'sin'; args are Expressions.
-    Expr('x') or Symbol('x') creates a symbol (a nullary Expr).
-    Expr('-', x) creates a unary; Expr('+', x, 1) creates a binary."""
-
     def __init__(self, op, *args):
         self.op = str(op)
         self.args = args
@@ -56,13 +50,11 @@ class Expr(object):
         return Expr('&', self, rhs)
 
     def __or__(self, rhs):
-        """Allow both P | Q, and P |'==>'| Q."""
         if isinstance(rhs, Expression):
             return Expr('|', self, rhs)
         else:
             return PartialExpr(rhs, self)
     def __call__(self, *args):
-        "Call: if 'f' is a Symbol, then f(0) == Expr('f', 0)."
         if self.args:
             raise ValueError('can only do a call for a Symbol, not an Expr')
         else:
@@ -89,7 +81,6 @@ class Expr(object):
             return '(' + opp.join(args) + ')'
 
 class PartialExpr:
-    """Given 'P |'==>'| Q, first form PartialExpr('==>', P), then combine with Q."""
     def __init__(self, op, lhs):
         self.op, self.lhs = op, lhs
 
@@ -100,17 +91,11 @@ class PartialExpr:
         return "PartialExpr('{}', {})".format(self.op, self.lhs)
 
 class defaultkeydict(collections.defaultdict):
-    """Like defaultdict, but the default_factory is a function of the key.
-    >>> d = defaultkeydict(len); d['four']
-    4
-    """
     def __missing__(self, key):
         self[key] = result = self.default_factory(key)
         return result
 
 def dissociate(op, args):
-    """Given an associative op, return a flattened list result such
-    that Expr(op, *result) means the same as Expr(op, *args)."""
     result = []
 
     def collect(subargs):
@@ -123,48 +108,34 @@ def dissociate(op, args):
     return result
 
 def conjuncts(s):
-    """Return a list of the conjuncts in the sentence s.
-    >>> conjuncts(A & B)
-    [A, B]
-    >>> conjuncts(A | B)
-    [(A | B)]
-    """
     return dissociate('&', [s])
 
-def is_symbol(s):
-    """A string s is a symbol if it starts with an alphabetic char."""
+def isSym(s):
     return isinstance(s, str) and s[:1].isalpha()
 
-def is_definite_clause(s):
-    """Returns True for exprs s of the form A & B & ... & C ==> D,
-    where all literals are positive.  In clause form, this is
-    ~A | ~B | ... | ~C | D, where exactly one clause is positive.
-    >>> is_definite_clause(expr('Farmer(Mac)'))
-    True
-    """
-
-    if is_symbol(s.op):
+def isDefClause(s):
+    if isSym(s.op):
         return True
     elif s.op == '==>':
         antecedent, consequent = s.args
-        return (is_symbol(consequent.op) and
-                all(is_symbol(arg.op) for arg in conjuncts(antecedent)))
+        return (isSym(consequent.op) and
+                all(isSym(arg.op) for arg in conjuncts(antecedent)))
     else:
         return False
 
 
-def fol_fc_ask(KB, alpha):
+def IncForwardChain(KB, alpha):
     
+    #Incremental Forward Chaining, based on figure 9.3 from the book
+
     k = 1
     match = True
-    """A simple forward-chaining algorithm. [Figure 9.3]"""
-    # TODO: Improve efficiency
-    kb_consts = list({c for clause in KB.clauses for c in constant_symbols(clause)})
+    kbCon = list({c for clause in KB.clauses for c in constants(clause)})
 
     def enum_subst(p):
         query_vars = list({v for clause in p for v in variables(clause)})
         # print(query_vars, " ", p)
-        for assignment_list in itertools.product(kb_consts, repeat=len(query_vars)):
+        for assignment_list in itertools.product(kbCon, repeat=len(query_vars)):
             theta = {x: y for x, y in zip(query_vars, assignment_list)}
             # print("THETA: ",theta)
             yield theta
@@ -180,7 +151,7 @@ def fol_fc_ask(KB, alpha):
         # print("TESTING2")
         new = []
         for rule in KB.clauses:
-            p, q = parse_definite_clause(rule)
+            p, q = parseDefClause(rule)
             #print(rule," ",p , " ", q)
             for theta in enum_subst(p):
                 if set(subst(theta, p)).issubset(set(KB.clauses)):
@@ -213,64 +184,50 @@ def fol_fc_ask(KB, alpha):
     # print("TESTING")
     return None
 
-def is_var_symbol(s):
-    """A logic variable symbol is an initial-lowercase string."""
-    return is_symbol(s) and s[0].islower()
+def isVarSym(s):
+    return isSym(s) and s[0].islower()
 
 def subst(s, x):
-    """Substitute the substitution s into the expression x.
-    >>> subst({x: 42, y:0}, F(x) + y)
-    (F(42) + 0)
-    """
     if isinstance(x, list):
         return [subst(s, xi) for xi in x]
     elif isinstance(x, tuple):
         return tuple([subst(s, xi) for xi in x])
     elif not isinstance(x, Expr):
         return x
-    elif is_var_symbol(x.op):
+    elif isVarSym(x.op):
         return s.get(x, x)
     else:
         return Expr(x.op, *[subst(s, arg) for arg in x.args])
 
-def parse_definite_clause(s):
-    """Return the antecedents and the consequent of a definite clause."""
-    assert is_definite_clause(s)
-    if is_symbol(s.op):
+def parseDefClause(s):
+    assert isDefClause(s)
+    if isSym(s.op):
         return [], s
     else:
         antecedent, consequent = s.args
         return conjuncts(antecedent), consequent
 
-def constant_symbols(x):
-    """Return the set of all constant symbols in x."""
+def constants(x):
     if not isinstance(x, Expr):
         return set()
-    elif is_prop_symbol(x.op) and not x.args:
+    elif isPropSym(x.op) and not x.args:
         return {x}
     else:
-        return {symbol for arg in x.args for symbol in constant_symbols(arg)}
+        return {symbol for arg in x.args for symbol in constants(arg)}
 
-def is_prop_symbol(s):
-    """A proposition logic symbol is an initial-uppercase string."""
-    return is_symbol(s) and s[0].isupper()
+def isPropSym(s):
+    return isSym(s) and s[0].isupper()
 
 def variables(s):
-    """Return a set of the variables in expression s.
-    >>> variables(expr('F(x, x) & G(x, y) & H(y, z) & R(A, z, 2)')) == {x, y, z}
-    True
-    """
     return {x for x in subexpressions(s) if is_variable(x)}
 
 def subexpressions(x):
-    """Yield the subexpressions of an Expression (including x itself)."""
     yield x
     if isinstance(x, Expr):
         for arg in x.args:
             yield from subexpressions(arg)
 
 def is_variable(x):
-    """A variable is an Expr with no args and a lowercase symbol as the op."""
     return isinstance(x, Expr) and not x.args and x.op[0].islower()
 
 def unify(f1,f2):
@@ -301,33 +258,20 @@ def unify(f1,f2):
 
 
 def expr(x):
-    """Shortcut to create an Expression. x is a str in which:
-    - identifiers are automatically defined as Symbols.
-    - ==> is treated as an infix |'==>'|, as are <== and <=>.
-    If x is already an Expression, it is returned unchanged. Example:
-    >>> expr('P & Q ==> Q')
-    ((P & Q) ==> Q)
-    """
     if isinstance(x, str):
         return eval(expr_handle_infix_ops(x), defaultkeydict(Symbol))
     else:
         return x
 
 def expr_handle_infix_ops(x):
-    """Given a str, return a new str with ==> replaced by |'==>'|, etc.
-    >>> expr_handle_infix_ops('P ==> Q')
-    "P |'==>'| Q"
-    """
     for op in infix_ops:
         x = x.replace(op, '|' + repr(op) + '|')
     return x
 
 def Symbol(name):
-    """A Symbol is just an Expr with no args."""
     return Expr(name)
 
 def first(iterable, default=None):
-    """Return the first element of an iterable or the next element of a generator; or default."""
     try:
         # return iterable[0]
         r = iterable[1]
@@ -339,7 +283,6 @@ def first(iterable, default=None):
         return next(iterable, default)
 
 def issequence(x):
-    """Is x a sequence?"""
     return isinstance(x, collections.abc.Sequence)
 
 Number = (int, float, complex)
@@ -351,6 +294,8 @@ def parse_input(l):
     p = l.pop()
     p = p.replace("PROVE ", "")
 
+
+    # Have to repalce ^ and -> because expr uses & and ==>
     for i in range(0,len(l)):
         s = l[i]
         s = s.replace("^", "&")
@@ -364,18 +309,6 @@ def main():
     f = sys.argv[1]
     file = open(f)
     l = file.readlines()
-
-    
-    # l = [
-    #     "TooBig(x) ^ GoodSize(y) -> BetterPet(y,x)",
-    #     "Giraffe(x) -> TooBig(x)",
-    #     "Dog(x) -> GoodSize(x)",
-    #     "Barks(x) ^ WagsTail(x) -> Dog(x)",
-    #     "Giraffe(Bob)",
-    #     "Barks(Sally)",
-    #     "WagsTail(Sally)",
-    #     "PROVE BetterPet(Sally,Bob)"
-    # ]
 
     l, p = parse_input(l)
 

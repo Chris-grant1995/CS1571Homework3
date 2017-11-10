@@ -1,0 +1,5 @@
+True
+TooBig(Bob)
+Dog(Sally)
+GoodSize(Sally)
+BetterPet(Sally, Bob)
