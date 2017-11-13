@@ -1,6 +1,7 @@
 False
-Roman(Marcus)
-People(Caesar)
-People(Marcus)
-Traitor(Marcus)
-Hate(Marcus, Caesar)
+INFERED:	K=
+Roman(Marcus),	1
+People(Caesar),	1
+People(Marcus),	1
+Traitor(Marcus),	2
+Hate(Marcus, Caesar),	3

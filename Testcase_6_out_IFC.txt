@@ -1,11 +1,12 @@
 False
-Sibling(Lisa, Jay)
-Sibling(Eric, Rachel)
-Distinct(Jay, Lisa)
-Distinct(Rachel, Eric)
-Sibling(Jay, Lisa)
-Sibling(Rachel, Eric)
-Cousin(Rachel, Frances)
-Cousin(Eric, Frances)
-Cousin(Frances, Rachel)
-Cousin(Frances, Eric)
+INFERED:	K=
+Sibling(Eric, Rachel),	1
+Sibling(Lisa, Jay),	1
+Distinct(Jay, Lisa),	1
+Distinct(Rachel, Eric),	1
+Sibling(Rachel, Eric),	2
+Sibling(Jay, Lisa),	2
+Cousin(Rachel, Frances),	2
+Cousin(Eric, Frances),	2
+Cousin(Frances, Rachel),	3
+Cousin(Frances, Eric),	3

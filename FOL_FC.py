@@ -1,15 +1,8 @@
 
 import itertools
 from collections import defaultdict
-import bisect
 import collections
 import collections.abc
-import operator
-import os.path
-import random
-import math
-import functools
-import time
 import sys
 
 infix_ops = '==> <== <=>'.split()
@@ -308,6 +301,7 @@ def main():
     # # # print(kb2.clauses)
     # print(kb2.IFCclauses)
     print(kb2.ask(prove) != False)
+    print("INFERED:")
     for i in infer:
         print(i)
 

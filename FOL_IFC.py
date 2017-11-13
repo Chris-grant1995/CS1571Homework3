@@ -1,15 +1,8 @@
 
 import itertools
 from collections import defaultdict
-import bisect
 import collections
 import collections.abc
-import operator
-import os.path
-import random
-import math
-import functools
-import time
 import sys
 
 infix_ops = '==> <== <=>'.split()
@@ -171,14 +164,14 @@ def IncForwardChain(KB, alpha):
                         if phi is not None:
                             # print("Test")
                             # print(new)
-                            infer.append(new[0])
+                            infer.append(str(new[0]) + ",\t" + str(k))
                             yield phi
         
         if not new:
             break
         for clause in new:
             # print("Clause: ", clause)
-            infer.append(clause)
+            infer.append(str(clause) + ",\t" + str(k))
             KB.tell(clause,k)
         k+=1
     # print("TESTING")
@@ -320,6 +313,7 @@ def main():
     # # # print(kb2.clauses)
     # print(kb2.IFCclauses)
     print(kb2.ask(prove) != False)
+    print("INFERED:\tK=")
     for i in infer:
         print(i)
 

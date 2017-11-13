@@ -1,4 +1,5 @@
 True
+INFERED:
 TooBig(Bob)
 Dog(Sally)
 GoodSize(Sally)

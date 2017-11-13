@@ -1,5 +1,6 @@
 True
-TooBig(Bob)
-Dog(Sally)
-GoodSize(Sally)
-BetterPet(Sally, Bob)
+INFERED:	K=
+TooBig(Bob),	1
+Dog(Sally),	1
+GoodSize(Sally),	2
+BetterPet(Sally, Bob),	3

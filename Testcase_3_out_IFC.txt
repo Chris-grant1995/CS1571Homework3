@@ -1,6 +1,7 @@
 True
-Sibling(Lisa, Jay)
-Sibling(Eric, Rachel)
-Distinct(Rachel, Eric)
-Distinct(Jay, Lisa)
-Sibling(Rachel, Eric)
+INFERED:	K=
+Sibling(Eric, Rachel),	1
+Sibling(Lisa, Jay),	1
+Distinct(Rachel, Eric),	1
+Distinct(Jay, Lisa),	1
+Sibling(Rachel, Eric),	2

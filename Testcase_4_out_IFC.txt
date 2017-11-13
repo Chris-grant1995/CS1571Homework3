@@ -1,2 +1,3 @@
 True
-Sibling(Lisa, Jay)
+INFERED:	K=
+Sibling(Eric, Rachel),	1

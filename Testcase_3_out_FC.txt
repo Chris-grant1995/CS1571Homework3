@@ -1,4 +1,5 @@
 True
+INFERED:
 Sibling(Lisa, Jay)
 Sibling(Eric, Rachel)
 Distinct(Jay, Lisa)

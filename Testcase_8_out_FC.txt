@@ -1,6 +1,7 @@
 True
+INFERED:
 Roman(Marcus)
-People(Marcus)
 People(Caesar)
+People(Marcus)
 Traitor(Marcus)
 Hate(Marcus, Caesar)

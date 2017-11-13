@@ -1,10 +1,11 @@
 False
+INFERED:
 Sibling(Eric, Rachel)
 Sibling(Lisa, Jay)
-Distinct(Jay, Lisa)
 Distinct(Rachel, Eric)
-Sibling(Jay, Lisa)
+Distinct(Jay, Lisa)
 Sibling(Rachel, Eric)
+Sibling(Jay, Lisa)
 Cousin(Eric, Frances)
 Cousin(Rachel, Frances)
 Cousin(Frances, Eric)
