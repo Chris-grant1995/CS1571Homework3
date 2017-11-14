@@ -1,0 +1,13 @@
+False
+INFERED:
+Sibling(Eric, Rachel)
+Sibling(Lisa, Jay)
+Distinct(Jay, Lisa)
+Distinct(Rachel, Eric)
+Sibling(Rachel, Eric)
+Sibling(Jay, Lisa)
+Cousin(Rachel, Frances)
+Cousin(Eric, Frances)
+Cousin(Frances, Rachel)
+Cousin(Frances, Eric)
+        0.42 real         0.41 user         0.00 sys

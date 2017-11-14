@@ -1,4 +1,4 @@
- CS 1575 Homework 3 Programming Assignment README.txt
+ CS 1571 Homework 3 Programming Assignment README.txt
 
  By Chris Grant 
 
